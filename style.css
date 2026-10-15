@@ -1,0 +1,2890 @@
+/* ==========================================================================
+   CIRCUIT SKETCHER — STUDIO CAD DESIGN SYSTEM (Taste-Skill Redesign)
+   ========================================================================== */
+
+:root {
+  color-scheme: light;
+
+  /* Typography */
+  --font-sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* Core Palette */
+  --ink: #0f172a;
+  --ink-secondary: #334155;
+  --ink-muted: #64748b;
+  --ink-subtle: #94a3b8;
+
+  /* Surfaces */
+  --panel-bg: #ffffff;
+  --panel-bg-subtle: #f8fafc;
+  --panel-border: rgba(15, 23, 42, 0.08);
+  --panel-border-strong: rgba(15, 23, 42, 0.15);
+  --canvas-bg: #f8fafc;
+
+  /* Precision Engineering Accents */
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --accent-subtle: #eff6ff;
+  --accent-border: #bfdbfe;
+
+  --emerald: #059669;
+  --emerald-subtle: #ecfdf5;
+  --emerald-border: #a7f3d0;
+
+  --amber: #d97706;
+  --amber-subtle: #fffbeb;
+  --amber-border: #fde68a;
+
+  --rose: #e11d48;
+  --rose-hover: #be123c;
+  --rose-subtle: #fff1f2;
+  --rose-border: #fecdd3;
+
+  /* Shadows */
+  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-sm: 0 2px 4px -1px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 6px 16px -3px rgba(15, 23, 42, 0.08), 0 2px 6px -2px rgba(15, 23, 42, 0.04);
+  --shadow-lg: 0 14px 28px -5px rgba(15, 23, 42, 0.12), 0 6px 12px -4px rgba(15, 23, 42, 0.06);
+  --shadow-floating: 0 24px 44px -8px rgba(15, 23, 42, 0.18), 0 8px 16px -4px rgba(15, 23, 42, 0.08);
+
+  /* Geometry */
+  --radius-sm: 6px;
+  --radius-md: 9px;
+  --radius-lg: 13px;
+  --radius-xl: 16px;
+
+  /* Transitions */
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ==========================================================================
+   RESET & FOUNDATIONS
+   ========================================================================== */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: var(--ink);
+  background: var(--canvas-bg);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* SVG icons */
+.btn-icon, .toggle-icon, .search-icon, .zoom-icon, .hud-icon, .chevron-icon {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   HEADER & TOPBAR (STUDIO WORKSPACE)
+   ========================================================================== */
+
+.app-header {
+  position: relative;
+  z-index: 20;
+  flex: none;
+  background: var(--panel-bg);
+  border-bottom: 1px solid var(--panel-border);
+  box-shadow: var(--shadow-xs);
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  height: 54px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 220px;
+}
+
+.brand-mark {
+  display: block;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(32, 59, 104, 0.18);
+  flex-shrink: 0;
+}
+
+.brand-copy {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.brand-name {
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 750;
+  letter-spacing: -0.025em;
+  white-space: nowrap;
+}
+
+.brand-badge {
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: var(--ink-muted);
+  background: var(--panel-bg-subtle);
+  border: 1px solid var(--panel-border);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+/* Project title */
+.project-identity {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  max-width: 440px;
+}
+
+.title-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.project-indicator {
+  color: var(--ink-subtle);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+.title-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+#circuit-title {
+  width: 100%;
+  height: 32px;
+  padding: 0 28px 0 10px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  background: transparent;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  transition: all 0.15s var(--ease-smooth);
+}
+
+#circuit-title:hover {
+  background: var(--panel-bg-subtle);
+  border-color: var(--panel-border);
+}
+
+#circuit-title:focus {
+  background: #ffffff;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.title-edit-icon {
+  position: absolute;
+  right: 8px;
+  width: 13px;
+  height: 13px;
+  color: var(--ink-subtle);
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* Status indicator */
+.topbar-actions {
+  display: flex;
+  align-items: center;
+}
+
+.status-pill, #status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--panel-border);
+  color: var(--ink-secondary);
+  background: var(--panel-bg-subtle);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+#status::before {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--emerald);
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.2);
+  content: "";
+  animation: statusPulse 2.5s infinite;
+}
+
+#status.error {
+  border-color: var(--rose-border);
+  color: var(--rose);
+  background: var(--rose-subtle);
+}
+
+#status.error::before {
+  background: var(--rose);
+  box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.2);
+  animation: none;
+}
+
+@keyframes statusPulse {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.4); }
+  70% { transform: scale(1); box-shadow: 0 0 0 5px rgba(5, 150, 105, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(5, 150, 105, 0); }
+}
+
+/* ==========================================================================
+   TOOLBAR (PRECISION DOCKED CAD ACTIONS)
+   ========================================================================== */
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 40px;
+  height: auto;
+  padding: 3px 10px;
+  background: var(--panel-bg);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.toolbar::-webkit-scrollbar {
+  display: none;
+}
+
+.toolbar-section {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.toolbar-divider {
+  width: 1px;
+  height: 18px;
+  margin: 0 2px;
+  background: var(--panel-border);
+  flex-shrink: 0;
+}
+
+.toolbar-spacer {
+  flex: 1;
+  min-width: 6px;
+}
+
+/* Button Component Standards */
+.button, .icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3.5px;
+  height: 28px;
+  padding: 0 6px;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-sm);
+  color: var(--ink-secondary);
+  background: #ffffff;
+  font-size: 10.8px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: var(--shadow-xs);
+  transition: all 0.12s var(--ease-smooth);
+}
+
+.button:hover, .icon-button:hover {
+  color: var(--ink);
+  border-color: var(--panel-border-strong);
+  background: var(--panel-bg-subtle);
+}
+
+.button:active, .icon-button:active {
+  transform: translateY(1px) scale(0.985);
+  box-shadow: none;
+}
+
+.button:disabled, .icon-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none;
+}
+
+.icon-button {
+  width: 28px;
+  padding: 0;
+}
+
+/* Primary Button */
+.button-primary {
+  border-color: var(--accent);
+  color: #ffffff;
+  background: var(--accent);
+  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.25);
+}
+
+.button-primary:hover {
+  border-color: var(--accent-hover);
+  color: #ffffff;
+  background: var(--accent-hover);
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.35);
+}
+
+/* Danger Button & Clear Workspace */
+.button-danger, #clear-btn {
+  color: var(--rose);
+  border-color: var(--rose-border);
+  background: var(--rose-subtle);
+  font-weight: 700;
+}
+
+.button-danger:hover, #clear-btn:hover {
+  color: #ffffff;
+  border-color: var(--rose);
+  background: var(--rose);
+  box-shadow: 0 2px 8px rgba(225, 29, 72, 0.35);
+}
+
+.hud-clear-btn {
+  height: 24px;
+  padding: 0 9px;
+  border: 1px solid rgba(225, 29, 72, 0.35);
+  background: rgba(225, 29, 72, 0.08);
+  color: var(--rose);
+  font-family: var(--font-sans);
+  font-size: 11.5px;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.hud-clear-btn:hover {
+  background: var(--rose);
+  border-color: var(--rose);
+  color: #ffffff;
+}
+
+[data-theme="dark"] .hud-clear-btn {
+  background: rgba(244, 63, 94, 0.12);
+  border-color: rgba(244, 63, 94, 0.35);
+  color: #fb7185;
+}
+
+[data-theme="dark"] .hud-clear-btn:hover {
+  background: #f43f5e;
+  border-color: #f43f5e;
+  color: #ffffff;
+}
+
+/* Wire Color Control */
+.wire-color-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 6px 0 5px;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-sm);
+  color: var(--ink-secondary);
+  background: #ffffff;
+  font-size: 10.5px;
+  font-weight: 600;
+  box-shadow: var(--shadow-xs);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.wire-color-control:hover {
+  border-color: var(--panel-border-strong);
+  background: var(--panel-bg-subtle);
+}
+
+.wire-swatch-ring {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(15, 23, 42, 0.18);
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+#wire-color-input {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  margin: -4px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+#wire-color-input::-webkit-color-swatch-wrapper { padding: 0; }
+#wire-color-input::-webkit-color-swatch { border: 0; }
+#wire-color-input::-moz-color-swatch { border: 0; }
+
+.wire-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Wiring checks button */
+.wiring-checks-button {
+  position: relative;
+}
+
+.wire-check-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 999px;
+  color: var(--emerald);
+  background: var(--emerald-subtle);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  transition: all 0.2s ease;
+}
+
+.wiring-checks-button.has-warnings {
+  border-color: var(--amber-border);
+  color: var(--amber);
+  background: var(--amber-subtle);
+}
+
+.wiring-checks-button.has-warnings .wire-check-count {
+  color: #ffffff;
+  background: var(--amber);
+}
+
+/* ==========================================================================
+   WORKSPACE & COMPONENT TRAY
+   ========================================================================== */
+
+.workspace {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+#tray {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  width: 300px;
+  overflow: hidden;
+  background: var(--panel-bg);
+  border-right: 1px solid var(--panel-border);
+  box-shadow: var(--shadow-sm);
+  transition: width 0.22s var(--ease-spring);
+}
+
+.tray-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 52px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.panel-title {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.panel-kicker, .section-eyebrow {
+  color: var(--ink-subtle);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+#tray h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+#tray-toggle {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-sm);
+  color: var(--ink-muted);
+  background: var(--panel-bg);
+  transition: all 0.15s ease;
+}
+
+#tray-toggle:hover {
+  color: var(--accent);
+  border-color: var(--accent-border);
+  background: var(--accent-subtle);
+}
+
+#tray-toggle svg {
+  transition: transform 0.2s var(--ease-spring);
+}
+
+#tray.is-collapsed #tray-toggle svg {
+  transform: rotate(180deg);
+}
+
+/* Search Box */
+.search-section {
+  padding: 12px 14px 6px;
+}
+
+.search-label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-sm);
+  background: var(--panel-bg-subtle);
+  transition: all 0.15s ease;
+}
+
+.search-wrap:focus-within {
+  background: #ffffff;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.search-icon {
+  color: var(--ink-subtle);
+}
+
+#part-search {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  color: var(--ink);
+  background: transparent;
+  font-size: 12px;
+}
+
+#part-search::placeholder {
+  color: var(--ink-subtle);
+}
+
+.shortcut-chip {
+  flex-shrink: 0;
+  padding: 1px 5px;
+  border: 1px solid var(--panel-border-strong);
+  border-radius: 4px;
+  color: var(--ink-muted);
+  background: #ffffff;
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+/* Category Filter Chips */
+.category-filters-container {
+  padding: 6px 14px 10px;
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.category-filters {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+
+.category-filters::-webkit-scrollbar {
+  display: none;
+}
+
+.category-chip {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border: 1px solid var(--panel-border);
+  border-radius: 999px;
+  color: var(--ink-muted);
+  background: #ffffff;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: capitalize;
+  transition: all 0.12s ease;
+}
+
+.category-chip:hover {
+  color: var(--accent);
+  border-color: var(--accent-border);
+  background: var(--accent-subtle);
+}
+
+.category-chip[aria-pressed="true"] {
+  color: #ffffff;
+  border-color: var(--accent);
+  background: var(--accent);
+  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.25);
+}
+
+/* Component Tray List */
+#tray-list {
+  display: grid;
+  flex: 1;
+  align-content: start;
+  gap: 10px;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 12px 14px 16px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--panel-border-strong) transparent;
+}
+
+/* Component Card */
+.part {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-md);
+  background: #ffffff;
+  cursor: grab;
+  user-select: none;
+  box-shadow: var(--shadow-xs);
+  transition: all 0.15s var(--ease-smooth);
+}
+
+.part:hover {
+  border-color: var(--accent-border);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.part:active {
+  cursor: grabbing;
+}
+
+.part svg {
+  width: 100%;
+  height: 64px;
+  padding: 4px;
+  background: var(--panel-bg-subtle);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(15, 23, 42, 0.04);
+}
+
+.part b {
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+}
+
+.part small {
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.part-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 1px solid var(--panel-border);
+}
+
+.part-details-btn {
+  padding: 4px 8px;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-sm);
+  color: var(--ink-secondary);
+  background: var(--panel-bg-subtle);
+  font-size: 10px;
+  font-weight: 600;
+  transition: all 0.12s ease;
+}
+
+.part-details-btn:hover {
+  color: var(--accent);
+  border-color: var(--accent-border);
+  background: var(--accent-subtle);
+}
+
+.part-remove-btn {
+  padding: 4px 8px;
+  border: 1px solid var(--rose-border);
+  border-radius: var(--radius-sm);
+  color: var(--rose);
+  background: var(--rose-subtle);
+  font-size: 10px;
+  font-weight: 600;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.part:hover .part-remove-btn, .part:focus-within .part-remove-btn {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Drag Preview */
+.part-drag-preview {
+  position: fixed;
+  z-index: 10000;
+  display: grid;
+  width: 160px;
+  gap: 6px;
+  padding: 10px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-md);
+  color: var(--ink);
+  background: #ffffff;
+  box-shadow: var(--shadow-floating);
+  font-size: 11px;
+  font-weight: 700;
+  pointer-events: none;
+}
+
+.part-drag-preview svg {
+  width: 100%;
+  height: 52px;
+}
+
+/* Part Details Inspector */
+.part-details {
+  flex: none;
+  max-height: 250px;
+  overflow-y: auto;
+  margin: 0 14px 10px;
+  padding: 12px;
+  border: 1px solid var(--accent-border);
+  border-radius: var(--radius-md);
+  background: var(--accent-subtle);
+}
+
+.part-details-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.part-details-heading h3 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.part-details-heading span {
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.part-details-close {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--panel-border);
+  border-radius: 5px;
+  color: var(--ink-muted);
+  background: #ffffff;
+}
+
+.part-dimensions {
+  display: flex;
+  justify-content: space-between;
+  margin: 8px 0;
+  padding: 6px 0;
+  border-block: 1px solid rgba(37, 99, 235, 0.15);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-secondary);
+}
+
+.part-details h4 {
+  margin: 8px 0 4px;
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.part-info-list {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.part-info-list li {
+  padding: 6px 8px;
+  border-radius: 5px;
+  background: #ffffff;
+  border: 1px solid rgba(37, 99, 235, 0.1);
+  color: var(--ink-secondary);
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.empty-state {
+  margin: 0;
+  padding: 24px 10px;
+  text-align: center;
+  color: var(--ink-muted);
+  font-size: 12px;
+}
+
+.library-footnote {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 16px;
+  border-top: 1px solid var(--panel-border);
+  color: var(--ink-subtle);
+  font-size: 11px;
+}
+
+.library-footnote-pulse {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--emerald);
+}
+
+/* Collapsed library state */
+#tray.is-collapsed {
+  width: 54px;
+}
+
+#tray.is-collapsed .tray-heading {
+  justify-content: center;
+  padding: 0;
+  border-bottom: 0;
+}
+
+#tray.is-collapsed .panel-title,
+#tray.is-collapsed .search-section,
+#tray.is-collapsed .category-filters-container,
+#tray.is-collapsed #part-details,
+#tray.is-collapsed #tray-list,
+#tray.is-collapsed .library-footnote {
+  display: none;
+}
+
+/* ==========================================================================
+   STAGE / CANVAS WORKSPACE (PRECISION BLUEPRINT GRID)
+   ========================================================================== */
+
+#stage-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background-color: var(--canvas-bg);
+  /* Precision CAD engineering dot grid */
+  background-image: radial-gradient(circle, rgba(100, 116, 139, 0.3) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+#stage {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+/* Floating Board Label HUD */
+.board-label {
+  position: absolute;
+  top: 16px;
+  left: 18px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-sm);
+  pointer-events: none;
+}
+
+.board-label-badge {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  color: var(--accent);
+  background: var(--accent-subtle);
+}
+
+.board-label-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.board-label-text strong {
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.board-label-text small {
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 9px;
+}
+
+/* Floating Custom Part Trigger */
+#custom-part-toggle {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-md);
+  color: var(--ink);
+  background: #ffffff;
+  font-size: 12px;
+  font-weight: 650;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.15s ease;
+}
+
+#custom-part-toggle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+/* Floating View Zoom HUD */
+.view-controls {
+  position: absolute;
+  right: 18px;
+  bottom: 18px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 4px;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-md);
+}
+
+.view-controls button {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 5px;
+  color: var(--ink-secondary);
+  background: transparent;
+  transition: all 0.12s ease;
+}
+
+.view-controls button:hover {
+  color: var(--ink);
+  background: var(--panel-bg-subtle);
+}
+
+#zoom-level {
+  min-width: 44px;
+  color: var(--ink);
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.view-controls-divider {
+  width: 1px;
+  height: 16px;
+  margin: 0 2px;
+  background: var(--panel-border);
+}
+
+#reset-view-btn {
+  width: auto;
+  padding: 0 8px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   CUSTOM PART DRAWER (SLIDE-OVER CAD GENERATOR)
+   ========================================================================== */
+
+#custom-part-drawer {
+  position: absolute;
+  top: 64px;
+  right: 18px;
+  bottom: 64px;
+  z-index: 25;
+  display: flex;
+  flex-direction: column;
+  width: min(390px, calc(100% - 36px));
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-xl);
+  background: #ffffff;
+  box-shadow: var(--shadow-floating);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(calc(100% + 24px));
+  transition: all 0.25s var(--ease-spring);
+}
+
+#custom-part-drawer.is-open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+}
+
+.custom-part-drawer-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.custom-part-kicker {
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.custom-part-drawer-heading h2 {
+  margin: 3px 0 2px;
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
+
+.custom-part-drawer-heading p {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 11px;
+}
+
+#custom-part-close {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-sm);
+  color: var(--ink-muted);
+  background: var(--panel-bg);
+}
+
+#custom-part-close:hover {
+  color: var(--ink);
+  background: var(--panel-bg-subtle);
+}
+
+.custom-part-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px 20px;
+}
+
+.custom-part-builder {
+  display: grid;
+  gap: 12px;
+}
+
+.custom-part-builder-intro {
+  margin: 0 0 4px;
+  color: var(--ink-secondary);
+  font-size: 11px;
+}
+
+.custom-part-builder label, .custom-part-advanced label {
+  display: grid;
+  gap: 5px;
+  color: var(--ink-secondary);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.unit-badge, .helper-text {
+  color: var(--ink-subtle);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.custom-part-builder input:not([type="color"]),
+.custom-part-builder select,
+#custom-part-json {
+  width: 100%;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--panel-border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  background: var(--panel-bg-subtle);
+  font-size: 12px;
+  transition: all 0.15s ease;
+}
+
+.custom-part-builder input:focus,
+.custom-part-builder select:focus,
+#custom-part-json:focus {
+  background: #ffffff;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.custom-part-field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.custom-part-size-row {
+  grid-template-columns: 1fr 1fr 64px;
+}
+
+.custom-part-size-row input[type="color"] {
+  width: 100%;
+  height: 36px;
+  padding: 2px;
+  border: 1px solid var(--panel-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--panel-bg-subtle);
+  cursor: pointer;
+}
+
+/* Footprint live preview */
+.custom-part-preview-wrap {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 110px;
+  padding: 12px;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-md);
+  background: #f8fafc;
+  overflow: hidden;
+}
+
+.preview-backdrop-grid {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(100, 116, 139, 0.25) 1px, transparent 1px);
+  background-size: 12px 12px;
+}
+
+#custom-part-preview {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-height: 110px;
+}
+
+.preview-caption {
+  position: relative;
+  z-index: 2;
+  margin-top: 4px;
+  color: var(--ink-subtle);
+  font-family: var(--font-mono);
+  font-size: 9px;
+}
+
+.button-action, #custom-part-create, #add-custom-part-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 38px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  color: #ffffff;
+  background: var(--accent);
+  font-size: 12px;
+  font-weight: 650;
+  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.3);
+  transition: all 0.15s ease;
+}
+
+.button-action:hover, #custom-part-create:hover, #add-custom-part-btn:hover {
+  background: var(--accent-hover);
+  box-shadow: 0 3px 8px rgba(37, 99, 235, 0.4);
+}
+
+.button-action svg, #custom-part-create svg, #add-custom-part-btn svg {
+  width: 15px;
+  height: 15px;
+}
+
+.custom-part-advanced {
+  border-top: 1px solid var(--panel-border);
+  padding-top: 12px;
+}
+
+.custom-part-advanced summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--ink-secondary);
+  font-size: 11px;
+  font-weight: 650;
+  cursor: pointer;
+  user-select: none;
+}
+
+.custom-part-advanced[open] summary svg {
+  transform: rotate(180deg);
+}
+
+.advanced-json-content {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+#custom-part-json {
+  height: 130px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+#custom-part-status {
+  min-height: 1.2em;
+  color: var(--ink-muted);
+  font-size: 11px;
+}
+
+/* ==========================================================================
+   MODAL DIALOGS
+   ========================================================================== */
+
+dialog {
+  width: min(92vw, 440px);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-xl);
+  background: transparent;
+  box-shadow: var(--shadow-floating);
+  overflow: visible;
+}
+
+dialog::backdrop {
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(8px);
+  animation: backdropFade 0.2s ease;
+}
+
+@keyframes backdropFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.dialog-card {
+  display: flex;
+  flex-direction: column;
+  padding: 22px;
+  background: #ffffff;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-xl);
+}
+
+.dialog-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.dialog-kicker {
+  color: var(--ink-subtle);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.dialog-header h2 {
+  margin: 2px 0 0;
+  color: var(--ink);
+  font-size: 17px;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
+
+.dialog-subtext {
+  margin: 3px 0 0;
+  color: var(--ink-muted);
+  font-size: 12px;
+}
+
+.dialog-icon-badge {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+}
+
+.dialog-icon-badge.warning {
+  color: var(--amber);
+  background: var(--amber-subtle);
+  border: 1px solid var(--amber-border);
+}
+
+.dialog-icon-badge.danger {
+  color: var(--rose);
+  background: var(--rose-subtle);
+  border: 1px solid var(--rose-border);
+}
+
+.dialog-icon-badge svg, .wire-checks-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.wire-checks-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  color: var(--emerald);
+  background: var(--emerald-subtle);
+  border: 1px solid var(--emerald-border);
+  flex-shrink: 0;
+}
+
+#wiring-checks-dialog.has-warnings .wire-checks-icon {
+  color: var(--amber);
+  background: var(--amber-subtle);
+  border-color: var(--amber-border);
+}
+
+.dialog-field-block {
+  display: grid;
+  gap: 6px;
+  margin: 10px 0 14px;
+}
+
+.dialog-field-block label {
+  color: var(--ink-secondary);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.dialog-field-block input, .dialog-field-block textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--panel-border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  background: var(--panel-bg-subtle);
+  font-size: 13px;
+}
+
+.dialog-field-block input:focus, .dialog-field-block textarea:focus {
+  background: #ffffff;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.dialog-message, .clear-workspace-message {
+  margin: 0 0 16px;
+  color: var(--ink-secondary);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.dialog-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.dialog-btn {
+  height: 34px;
+  padding: 0 14px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.12s ease;
+}
+
+.dialog-btn.secondary {
+  border: 1px solid var(--panel-border);
+  color: var(--ink-secondary);
+  background: #ffffff;
+}
+
+.dialog-btn.secondary:hover {
+  background: var(--panel-bg-subtle);
+  border-color: var(--panel-border-strong);
+}
+
+.dialog-btn.primary {
+  border: 0;
+  color: #ffffff;
+  background: var(--accent);
+  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.3);
+}
+
+.dialog-btn.primary:hover {
+  background: var(--accent-hover);
+}
+
+.dialog-btn.danger {
+  border: 0;
+  color: #ffffff;
+  background: var(--rose);
+  box-shadow: 0 1px 3px rgba(225, 29, 72, 0.3);
+}
+
+.dialog-btn.danger:hover {
+  background: var(--rose-hover);
+}
+
+.dialog-footer-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.dialog-tip {
+  color: var(--ink-subtle);
+  font-size: 10px;
+}
+
+.note-close-btn {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  margin-left: auto;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-sm);
+  color: var(--ink-muted);
+  background: #ffffff;
+}
+
+.note-close-btn:hover {
+  color: var(--ink);
+  background: var(--panel-bg-subtle);
+}
+
+/* ==========================================================================
+   RESISTOR COLOR CODE SCHEMATIC GRAPHIC
+   ========================================================================== */
+
+.resistor-schematic-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80px;
+  margin: 6px 0 12px;
+  padding: 14px;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-md);
+  background: #f8fafc;
+}
+
+.axial-resistor-graphic {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 320px;
+}
+
+.resistor-lead {
+  flex: 1;
+  height: 4px;
+  background: #94a3b8;
+}
+
+.resistor-body {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 160px;
+  height: 44px;
+  border-radius: 12px;
+  background: #fde68a;
+  border: 1px solid #d4b872;
+}
+
+.resistor-band-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 0 18px;
+}
+
+.resistor-band-swatch {
+  width: 12px;
+  height: 44px;
+  border-radius: 2px;
+}
+
+.resistor-band-swatch.tolerance {
+  margin-left: 14px;
+}
+
+/* Wiring Checks List */
+.wiring-checks-list {
+  display: grid;
+  gap: 8px;
+  max-height: min(45vh, 280px);
+  overflow-y: auto;
+  margin: 10px 0 14px;
+  padding: 0;
+  list-style: none;
+}
+
+.wiring-checks-list li {
+  padding: 10px 12px;
+  border: 1px solid var(--amber-border);
+  border-radius: var(--radius-sm);
+  color: var(--amber);
+  background: var(--amber-subtle);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+/* ==========================================================================
+   RESPONSIVE SCALING
+   ========================================================================== */
+
+@media (max-width: 1024px) {
+  .topbar { padding: 0 14px; }
+  .toolbar { padding: 0 14px; overflow-x: auto; }
+}
+
+@media (max-width: 768px) {
+  .brand-badge { display: none; }
+  .project-identity { max-width: 220px; }
+  .toolbar { height: auto; flex-wrap: wrap; padding: 8px 12px; }
+  #tray { width: 250px; }
+  #tray.is-collapsed { width: 48px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ==========================================================================
+   THEME SWITCHER & OBSIDIAN DARK CAD THEME
+   ========================================================================== */
+
+.theme-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--panel-border);
+  border-radius: 999px;
+  color: var(--ink-secondary);
+  background: var(--panel-bg-subtle);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.theme-toggle-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-subtle);
+}
+
+.theme-toggle-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Light Mode: Show moon to switch to dark */
+:root:not([data-theme="dark"]) .sun-icon { display: none; }
+:root:not([data-theme="dark"]) .moon-icon { display: block; }
+
+/* Dark Mode: Show sun to switch to light */
+[data-theme="dark"] .sun-icon { display: block; }
+[data-theme="dark"] .moon-icon { display: none; }
+
+/* ==========================================================================
+   [data-theme="dark"] OBSIDIAN CYBERDECK CAD OVERRIDES
+   ========================================================================== */
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --ink: #f8fafc;
+  --ink-secondary: #cbd5e1;
+  --ink-muted: #94a3b8;
+  --ink-subtle: #64748b;
+
+  --panel-bg: #0f172a;
+  --panel-bg-subtle: #1e293b;
+  --panel-border: rgba(255, 255, 255, 0.09);
+  --panel-border-strong: rgba(255, 255, 255, 0.18);
+  --canvas-bg: #090d16;
+
+  --accent: #38bdf8;
+  --accent-hover: #0ea5e9;
+  --accent-subtle: rgba(56, 189, 248, 0.14);
+  --accent-border: rgba(56, 189, 248, 0.35);
+
+  --emerald: #10b981;
+  --emerald-subtle: rgba(16, 185, 129, 0.15);
+  --emerald-border: rgba(16, 185, 129, 0.35);
+
+  --amber: #f59e0b;
+  --amber-subtle: rgba(245, 158, 11, 0.15);
+  --amber-border: rgba(245, 158, 11, 0.35);
+
+  --rose: #f43f5e;
+  --rose-hover: #fb7185;
+  --rose-subtle: rgba(244, 63, 94, 0.15);
+  --rose-border: rgba(244, 63, 94, 0.35);
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 14px 28px rgba(0, 0, 0, 0.7);
+  --shadow-floating: 0 24px 44px rgba(0, 0, 0, 0.85);
+}
+
+[data-theme="dark"] #stage-wrap {
+  background-color: var(--canvas-bg);
+  background-image: radial-gradient(circle, rgba(56, 189, 248, 0.22) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+[data-theme="dark"] .button, 
+[data-theme="dark"] .icon-button,
+[data-theme="dark"] .wire-color-control,
+[data-theme="dark"] .category-chip,
+[data-theme="dark"] #tray-toggle {
+  background: #1e293b;
+  border-color: var(--panel-border);
+  color: var(--ink-secondary);
+}
+
+[data-theme="dark"] .button:hover, 
+[data-theme="dark"] .icon-button:hover,
+[data-theme="dark"] .wire-color-control:hover,
+[data-theme="dark"] #tray-toggle:hover {
+  background: #334155;
+  border-color: var(--panel-border-strong);
+  color: var(--ink);
+}
+
+[data-theme="dark"] .button-primary {
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
+  color: #0f172a !important;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.35);
+}
+
+[data-theme="dark"] .button-primary:hover {
+  background: var(--accent-hover) !important;
+  color: #0f172a !important;
+}
+
+[data-theme="dark"] .part {
+  background: #1e293b;
+  border-color: var(--panel-border);
+}
+
+[data-theme="dark"] .part:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.2);
+}
+
+[data-theme="dark"] .part svg {
+  background: #090d16;
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+[data-theme="dark"] .part-details-btn {
+  background: #334155;
+  color: #e2e8f0;
+  border-color: var(--panel-border);
+}
+
+[data-theme="dark"] .part-card-actions {
+  border-top-color: var(--panel-border);
+}
+
+[data-theme="dark"] .board-label,
+[data-theme="dark"] .view-controls {
+  background: rgba(15, 23, 42, 0.85);
+  border-color: var(--panel-border-strong);
+  box-shadow: var(--shadow-md);
+}
+
+[data-theme="dark"] #custom-part-toggle {
+  background: #1e293b;
+  border-color: var(--panel-border);
+  color: var(--ink);
+}
+
+[data-theme="dark"] #custom-part-drawer,
+[data-theme="dark"] .dialog-card {
+  background: #0f172a;
+  border-color: var(--panel-border-strong);
+}
+
+[data-theme="dark"] .custom-part-preview-wrap,
+[data-theme="dark"] .resistor-schematic-wrap {
+  background: #090d16;
+  border-color: var(--panel-border);
+}
+
+[data-theme="dark"] .dialog-btn.secondary {
+  background: #1e293b;
+  border-color: var(--panel-border);
+  color: var(--ink-secondary);
+}
+
+[data-theme="dark"] .dialog-btn.secondary:hover {
+  background: #334155;
+  color: var(--ink);
+}
+
+/* ==========================================================================
+   CONVENIENCE & CAD FEATURES: Wire Swatches, Signal Flow, Grid Snap, Radar, Shortcuts
+   ========================================================================== */
+
+/* 1. Quick Wire Palette Group */
+.wire-palette-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--panel-bg-subtle);
+  border: 1px solid var(--panel-border);
+  padding: 2px 5px 2px 3px;
+  border-radius: 9999px;
+}
+
+.wire-quick-swatches {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.swatch-btn {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--swatch);
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+  position: relative;
+  outline: none;
+}
+
+.swatch-btn:hover {
+  transform: scale(1.25);
+  border-color: #ffffff;
+  box-shadow: 0 0 6px var(--swatch);
+}
+
+.swatch-btn.active {
+  transform: scale(1.15);
+  border-color: #ffffff;
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+.swatch-btn.auto-swatch {
+  width: auto;
+  height: 15px;
+  padding: 0 4px;
+  border-radius: 9999px;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--ink-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.swatch-btn.auto-swatch:hover {
+  color: var(--ink);
+  border-color: var(--accent);
+  transform: none;
+  box-shadow: none;
+}
+
+.swatch-btn.auto-swatch.active {
+  background: var(--accent);
+  color: #ffffff;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-subtle);
+}
+
+/* 2. Signal Flow Pulse Button */
+.button-pulse {
+  position: relative;
+}
+
+.pulse-indicator-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ink-subtle);
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.button-pulse.active {
+  background: var(--amber-subtle);
+  border-color: var(--amber-border);
+  color: var(--amber);
+}
+
+.button-pulse.active .pulse-indicator-dot {
+  background: #f59e0b;
+  box-shadow: 0 0 8px #f59e0b;
+  animation: signal-glow-pulse 1.2s infinite ease-in-out;
+}
+
+@keyframes signal-glow-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.35); opacity: 0.6; }
+}
+
+/* 3. Grid Snap Button */
+#grid-snap-btn.active {
+  background: var(--accent-subtle);
+  border-color: var(--accent-border);
+  color: var(--accent);
+}
+
+/* 4. Canvas Mini-Map / Radar HUD */
+.minimap-container {
+  position: absolute;
+  right: 18px;
+  bottom: 60px;
+  width: 160px;
+  height: 100px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(15, 23, 42, 0.88);
+  border: 1px solid var(--panel-border-strong);
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 10;
+  cursor: crosshair;
+  transition: opacity 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+
+.minimap-container:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+#minimap-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.minimap-badge {
+  position: absolute;
+  top: 5px;
+  left: 6px;
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  background: rgba(15, 23, 42, 0.7);
+  padding: 1px 5px;
+  border-radius: 4px;
+  pointer-events: none;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+}
+
+/* 5. Shortcuts Dialog Modal */
+.shortcuts-card {
+  max-width: 680px;
+  width: 90vw;
+}
+
+.shortcuts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin: 16px 0 24px;
+}
+
+.shortcut-group {
+  background: var(--panel-bg-subtle);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 14px 16px;
+}
+
+.shortcut-group h3 {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  margin: 0 0 10px 0;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.shortcut-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 0;
+  font-size: 12.5px;
+  color: var(--ink-secondary);
+}
+
+.shortcut-desc {
+  font-weight: 500;
+}
+
+.shortcut-keys {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.shortcut-keys kbd {
+  display: inline-block;
+  padding: 2px 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border-strong);
+  border-radius: 4px;
+  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.1);
+}
+
+[data-theme="dark"] .shortcut-keys kbd {
+  background: #1e293b;
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
+}
+
+/* ==========================================================================
+   6. Electrical Net Probe & Auto-Coloring HUD Styles
+   ========================================================================== */
+
+/* Net Probe Button in Toolbar */
+.button-probe {
+  position: relative;
+  transition: all 0.15s ease;
+}
+
+.probe-indicator-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ink-subtle);
+  transition: all 0.2s ease;
+}
+
+.button-probe.active {
+  background: rgba(56, 189, 248, 0.16);
+  border-color: rgba(56, 189, 248, 0.45);
+  color: #38bdf8;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+}
+
+.button-probe.active .probe-indicator-dot {
+  background: #38bdf8;
+  box-shadow: 0 0 8px #38bdf8;
+  animation: probe-radar-pulse 1.2s infinite ease-in-out;
+}
+
+@keyframes probe-radar-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.4); opacity: 0.55; }
+}
+
+/* Subtle Auto-Color Button in Wires Section */
+.button-subtle {
+  height: 26px;
+  padding: 0 8px;
+  font-size: 11px;
+  gap: 4px;
+  background: var(--panel-bg-subtle);
+  border: 1px solid var(--panel-border);
+  color: var(--ink-secondary);
+}
+
+.button-subtle:hover {
+  background: var(--panel-bg);
+  color: var(--ink);
+  border-color: var(--accent);
+}
+
+/* Floating Net Inspector HUD Card */
+.net-inspector-card {
+  position: absolute;
+  top: 64px;
+  left: 24px;
+  width: 320px;
+  max-width: calc(100vw - 48px);
+  background: rgba(15, 23, 42, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  border-radius: 10px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 1px rgba(255, 255, 255, 0.2);
+  z-index: 25;
+  color: #f8fafc;
+  font-family: var(--font-sans);
+  overflow: hidden;
+  animation: netCardSlideIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  touch-action: none;
+}
+
+@keyframes netCardSlideIn {
+  from { opacity: 0; transform: translateY(-8px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.net-inspector-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: rgba(30, 41, 59, 0.85);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: grab;
+  user-select: none;
+}
+
+.net-inspector-header:active {
+  cursor: grabbing;
+}
+
+.net-title-badge {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+.net-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #38bdf8;
+  box-shadow: 0 0 6px #38bdf8;
+  flex-shrink: 0;
+}
+
+.net-status-dot.status-critical {
+  background: #ef4444;
+  box-shadow: 0 0 8px #ef4444;
+  animation: alert-blink 0.8s infinite alternate;
+}
+
+.net-status-dot.status-warning {
+  background: #f59e0b;
+  box-shadow: 0 0 8px #f59e0b;
+}
+
+@keyframes alert-blink {
+  from { opacity: 1; }
+  to { opacity: 0.3; }
+}
+
+.net-inspector-title {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: #f1f5f9;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.net-inspector-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.net-mini-btn {
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #38bdf8;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  padding: 2px 7px;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.net-mini-btn:hover {
+  background: #38bdf8;
+  color: #0f172a;
+}
+
+.net-inspector-close {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 18px;
+  line-height: 1;
+  padding: 0 4px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.net-inspector-close:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.net-inspector-body {
+  padding: 10px 12px;
+  font-size: 11.5px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.net-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.net-meta-chip {
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: #cbd5e1;
+}
+
+.net-health-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+}
+
+.net-health-row.health-ok {
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  color: #86efac;
+}
+
+.net-health-row.health-warning {
+  background: rgba(245, 158, 11, 0.14);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #fde68a;
+}
+
+.net-health-row.health-critical {
+  background: rgba(239, 68, 68, 0.18);
+  border: 1px solid rgba(239, 68, 68, 0.45);
+  color: #fca5a5;
+  font-weight: 600;
+}
+
+.net-nodes-label {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  color: #64748b;
+  letter-spacing: 0.05em;
+  margin-top: 2px;
+}
+
+.net-nodes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 160px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.net-node-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 8px;
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.net-node-item:hover {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: rgba(56, 189, 248, 0.35);
+}
+
+.net-node-part {
+  font-weight: 600;
+  color: #e2e8f0;
+  font-size: 11px;
+}
+
+.net-node-pin {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.35);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+}
+
+/* ==========================================================================
+   DIGITAL MULTIMETER (DMM-800) & INSTANT CONNECTION WARNING SYSTEM
+   ========================================================================== */
+
+/* Multimeter Toolbar Button */
+.button-multimeter.active {
+  border-color: #f59e0b;
+  color: #fbbf24;
+  background: rgba(245, 158, 11, 0.12);
+  box-shadow: 0 0 0 1px #f59e0b, 0 1px 4px rgba(245, 158, 11, 0.25);
+}
+
+.instant-warning-toast[hidden],
+.multimeter-hud[hidden] {
+  display: none !important;
+}
+
+/* Instant Electrical Connection Warning Toast */
+.instant-warning-toast {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: rgba(24, 10, 14, 0.96);
+  border: 1.5px solid #ef4444;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 20px rgba(239, 68, 68, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #ffffff;
+  max-width: 680px;
+  width: max-content;
+  animation: warningSlideDown 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: auto;
+}
+
+.instant-warning-toast.warning {
+  border-color: #f59e0b;
+  background: rgba(28, 20, 10, 0.96);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 20px rgba(245, 158, 11, 0.35);
+}
+
+@keyframes warningSlideDown {
+  from { opacity: 0; transform: translate(-50%, -12px) scale(0.96); }
+  to { opacity: 1; transform: translate(-50%, 0) scale(1); }
+}
+
+.instant-warning-icon-wrapper {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  flex-shrink: 0;
+}
+
+.instant-warning-toast.warning .instant-warning-icon-wrapper {
+  background: rgba(245, 158, 11, 0.2);
+  color: #f59e0b;
+}
+
+.instant-warning-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.instant-warning-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.instant-warning-title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #fca5a5;
+  text-transform: uppercase;
+}
+
+.instant-warning-toast.warning .instant-warning-title {
+  color: #fcd34d;
+}
+
+.instant-warning-message {
+  font-size: 12px;
+  color: #f1f5f9;
+  line-height: 1.35;
+}
+
+.instant-warning-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 12px;
+  flex-shrink: 0;
+}
+
+.button-danger-undo {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 6px;
+  border: 1px solid #ef4444;
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+}
+
+.button-danger-undo:hover {
+  background: #dc2626;
+  border-color: #b91c1c;
+  transform: translateY(-1px);
+}
+
+.button-danger-undo:active {
+  transform: translateY(1px);
+}
+
+.instant-warning-close {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.instant-warning-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+/* Floating Digital Multimeter HUD (Fluke-styled rugged test equipment) */
+.multimeter-hud {
+  position: absolute;
+  top: 60px;
+  right: 24px;
+  width: 290px;
+  background: #0f172a;
+  border: 2px solid #f59e0b;
+  border-radius: 12px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.75), 0 0 15px rgba(245, 158, 11, 0.2);
+  z-index: 30;
+  color: #f8fafc;
+  font-family: var(--font-sans);
+  overflow: hidden;
+  animation: dmmSlideIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  touch-action: none;
+}
+
+@keyframes dmmSlideIn {
+  from { opacity: 0; transform: translateY(-10px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.multimeter-hud.minimized .multimeter-body {
+  display: none;
+}
+
+.multimeter-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: #1e293b;
+  border-bottom: 1.5px solid rgba(245, 158, 11, 0.4);
+  cursor: grab;
+  user-select: none;
+}
+
+.multimeter-header:active {
+  cursor: grabbing;
+}
+
+.multimeter-drag-handle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dmm-grip {
+  color: #64748b;
+  font-size: 13px;
+  letter-spacing: -1px;
+}
+
+.multimeter-brand {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #fbbf24;
+}
+
+.multimeter-mode-badge {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: rgba(34, 211, 238, 0.15);
+  color: #22d3ee;
+  border: 1px solid rgba(34, 211, 238, 0.3);
+}
+
+.multimeter-window-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.multimeter-min-btn, .multimeter-close-btn {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.multimeter-min-btn:hover, .multimeter-close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.multimeter-body {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Digital Multimeter LCD Display */
+.multimeter-lcd {
+  background: #021a1a;
+  border: 2px solid #0f3d3d;
+  border-radius: 8px;
+  padding: 10px 12px;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.8), 0 0 10px rgba(34, 211, 238, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.multimeter-lcd-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.lcd-badge {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  color: #0f4d4d;
+  letter-spacing: 0.05em;
+}
+
+.lcd-badge.active {
+  color: #22d3ee;
+  text-shadow: 0 0 6px rgba(34, 211, 238, 0.6);
+}
+
+.multimeter-lcd-main {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 4px;
+  padding: 4px 0;
+}
+
+.lcd-sign {
+  font-family: var(--font-mono);
+  font-size: 24px;
+  font-weight: 700;
+  color: #22d3ee;
+  text-shadow: 0 0 8px rgba(34, 211, 238, 0.5);
+}
+
+.lcd-digits {
+  font-family: var(--font-mono);
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #22d3ee;
+  text-shadow: 0 0 10px rgba(34, 211, 238, 0.65);
+  font-variant-numeric: tabular-nums;
+}
+
+.lcd-unit {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 700;
+  color: #22d3ee;
+  margin-left: 2px;
+}
+
+.multimeter-bargraph-container {
+  width: 100%;
+  height: 4px;
+  background: rgba(34, 211, 238, 0.15);
+  border-radius: 2px;
+  overflow: hidden;
+  margin: 2px 0;
+}
+
+.multimeter-bargraph {
+  height: 100%;
+  width: 0%;
+  background: #22d3ee;
+  box-shadow: 0 0 6px #22d3ee;
+  transition: width 0.15s ease, background-color 0.15s ease;
+}
+
+.multimeter-lcd-sub {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(34, 211, 238, 0.2);
+}
+
+.lcd-sub-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 10px;
+}
+
+.sub-lead-tag {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  font-weight: 800;
+  padding: 1px 4px;
+  border-radius: 3px;
+  letter-spacing: 0.04em;
+}
+
+.sub-lead-tag.red {
+  background: rgba(239, 68, 68, 0.25);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.sub-lead-tag.blk {
+  background: rgba(148, 163, 184, 0.2);
+  color: #cbd5e1;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+.sub-lead-val {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}
+
+/* Multimeter Probe Buttons & Actions */
+.multimeter-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.multimeter-probes-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.dmm-probe-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 8px;
+  border-radius: 6px;
+  border: 1px solid #334155;
+  background: #1e293b;
+  color: #cbd5e1;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.dmm-probe-btn:hover {
+  background: #334155;
+  color: #ffffff;
+}
+
+.dmm-probe-btn.red.active {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+}
+
+.dmm-probe-btn.black.active {
+  border-color: #94a3b8;
+  background: rgba(148, 163, 184, 0.25);
+  color: #ffffff;
+  box-shadow: 0 0 8px rgba(148, 163, 184, 0.35);
+}
+
+.probe-btn-icon.red {
+  color: #ef4444;
+  font-size: 12px;
+}
+
+.probe-btn-icon.black {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.multimeter-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dmm-tool-btn {
+  flex: 1;
+  height: 24px;
+  padding: 0 6px;
+  border-radius: 4px;
+  border: 1px solid #334155;
+  background: #1e293b;
+  color: #94a3b8;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.dmm-tool-btn:hover {
+  border-color: #64748b;
+  background: #334155;
+  color: #ffffff;
+}
+
+

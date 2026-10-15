@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0f172a">
+  <title>Circuit Sketcher — Studio CAD Workspace</title>
+  <link rel="icon" href="logo.svg" type="image/svg+xml">
+  <!-- Modern high-character typography from Google Fonts with seamless fallbacks -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=20261014-taste-studio">
+</head>
+<body>
+  <header class="app-header">
+    <div class="topbar">
+      <div class="brand">
+        <img class="brand-mark" src="logo.svg" alt="Circuit Sketcher Logo">
+        <div class="brand-copy">
+          <span class="brand-name">Circuit Sketcher</span>
+          <span class="brand-badge">STUDIO CAD</span>
+        </div>
+      </div>
+
+      <div class="project-identity">
+        <label class="title-label" for="circuit-title">
+          <span class="project-indicator">PROJECT</span>
+          <div class="title-input-wrapper">
+            <input id="circuit-title" value="Untitled circuit" maxlength="80" aria-label="Circuit name" spellcheck="false">
+            <svg class="title-edit-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M11.5 2.5a1.4 1.4 0 0 1 2 2L5 13H2.5V10.5l8.5-8.5z"/></svg>
+          </div>
+        </label>
+      </div>
+
+      <div class="topbar-actions">
+        <button id="theme-toggle-btn" class="theme-toggle-btn" type="button" aria-label="Toggle Obsidian Dark / Studio Light Mode" title="Toggle Obsidian Dark / Studio Light Theme">
+          <svg class="sun-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10" cy="10" r="4"/><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.3 4.3l1.4 1.4M14.3 14.3l1.4 1.4M4.3 15.7l1.4-1.4M14.3 5.7l1.4-1.4"/></svg>
+          <svg class="moon-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.3 12.7A8 8 0 1 1 7.3 2.7a6.5 6.5 0 0 0 10 10z"/></svg>
+          <span class="theme-toggle-label">Theme</span>
+        </button>
+        <div id="status" class="status-pill" role="status" aria-live="polite">
+          <span class="status-indicator" aria-hidden="true"></span>
+          <span class="status-text">Loading parts…</span>
+        </div>
+      </div>
+    </div>
+
+    <nav class="toolbar" aria-label="Circuit actions">
+      <div class="toolbar-section toolbar-history">
+        <button id="undo-btn" class="icon-button" type="button" aria-label="Undo" title="Undo (Ctrl+Z)" disabled>
+          <svg class="btn-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8L3 12l4 4"/><path d="M3 12h9a5 5 0 0 0 5-5v-1"/></svg>
+          <span class="sr-only">Undo</span>
+        </button>
+        <button id="redo-btn" class="icon-button" type="button" aria-label="Redo" title="Redo (Ctrl+Y)" disabled>
+          <svg class="btn-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 8l4 4-4 4"/><path d="M17 12H8a5 5 0 0 1-5-5v-1"/></svg>
+          <span class="sr-only">Redo</span>
+        </button>
+      </div>
+
+      <span class="toolbar-divider" aria-hidden="true"></span>
+
+      <div class="toolbar-section toolbar-primary">
+        <button id="save-btn" class="button button-primary" type="button">
+          <svg class="btn-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 5L8 13l-4-4"/></svg>
+          <span>Save</span>
+        </button>
+        <button id="clear-btn" class="button button-danger" type="button" title="Clear entire workspace and start fresh (New Board)">
+          <svg class="btn-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h12M8 6V4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2M15 6v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+          <span>Clear</span>
+        </button>
+
+        <div class="wire-palette-group" role="group" aria-label="Wire color tools">
+          <label id="wire-color-control" class="wire-color-control" title="Custom color picker. Select a wire to recolor, or set new wire default.">
+            <span class="wire-swatch-ring">
+              <input id="wire-color-input" type="color" value="#2f6fb0" aria-label="Wire custom color">
+            </span>
+            <span class="wire-label">Wire</span>
+          </label>
+          <div id="wire-quick-swatches" class="wire-quick-swatches">
+            <button type="button" class="swatch-btn" data-color="#ef4444" title="1: 5V / Power (Red)" style="--swatch:#ef4444;" aria-label="Red wire (1)"></button>
+            <button type="button" class="swatch-btn" data-color="#1e293b" title="2: GND / Ground (Dark)" style="--swatch:#1e293b;" aria-label="Dark wire (2)"></button>
+            <button type="button" class="swatch-btn" data-color="#eab308" title="3: Signal (Yellow)" style="--swatch:#eab308;" aria-label="Yellow wire (3)"></button>
+            <button type="button" class="swatch-btn" data-color="#22c55e" title="4: Data (Green)" style="--swatch:#22c55e;" aria-label="Green wire (4)"></button>
+            <button type="button" class="swatch-btn" data-color="#3b82f6" title="5: Analog (Blue)" style="--swatch:#3b82f6;" aria-label="Blue wire (5)"></button>
+            <button type="button" class="swatch-btn" data-color="#f97316" title="6: 3.3V (Orange)" style="--swatch:#f97316;" aria-label="Orange wire (6)"></button>
+            <button type="button" class="swatch-btn" data-color="#a855f7" title="7: Bus (Purple)" style="--swatch:#a855f7;" aria-label="Purple wire (7)"></button>
+            <button type="button" class="swatch-btn auto-swatch" data-color="auto" title="Auto: Reset to pin default color (0)" aria-label="Auto pin wire color">Auto</button>
+          </div>
+          <button id="autocolor-wires-btn" class="button button-subtle" type="button" title="Auto-Color all wires by Electrical Standard (Hotkey: Shift+C)">
+            <svg class="btn-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2l4 4-8 8H4v-4l8-8z"/><path d="M14 6l-2-2"/>
+            </svg>
+            <span>Auto-Color</span>
+          </button>
+        </div>
+      </div>
+
+      <span class="toolbar-divider" aria-hidden="true"></span>
+
+      <div class="toolbar-section toolbar-cad">
+        <button id="multimeter-btn" class="button button-multimeter" type="button" title="Digital Multimeter & Voltage Probe (Hotkey: M)" aria-pressed="false">
+          <svg class="btn-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3.5" y="2" width="13" height="16" rx="2"/>
+            <rect x="5.5" y="4" width="9" height="5" rx="1" fill="currentColor" fill-opacity="0.15"/>
+            <circle cx="10" cy="13.5" r="2.5"/>
+            <path d="M10 11.5v2M10 13.5l1.5 1"/>
+          </svg>
+          <span>Multimeter</span>
+        </button>
+        <button id="net-probe-btn" class="button button-probe" type="button" title="Electrical Net Probe & Highlighter (Hotkey: X)" aria-pressed="false">
+          <svg class="btn-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="10" cy="10" r="7"/>
+            <path d="M10 3v4M10 13v4M3 10h4M13 10h4"/>
+            <circle cx="10" cy="10" r="2" fill="currentColor"/>
+          </svg>
+          <span class="probe-indicator-dot" aria-hidden="true"></span>
+          <span>Probe</span>
+        </button>
+        <button id="wiring-checks-btn" class="button wiring-checks-button" type="button" title="Wiring Diagnostics & Electrical Validation" aria-haspopup="dialog" aria-controls="wiring-checks-dialog">
+          <svg class="btn-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2L3 5v5c0 4.5 3 7.8 7 9 4-1.2 7-4.5 7-9V5l-7-3z"/><path d="M7.5 10l2 2 3.5-3.5"/></svg>
+          <span>Diagnostics</span>
+          <span id="wire-check-count" class="wire-check-count">0</span>
+        </button>
+        <button id="grid-snap-btn" class="button" type="button" title="Toggle 20px Grid Snapping (Hotkey: G)" aria-pressed="false">
+          <svg class="btn-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M4 8h12M4 12h12M8 4v12M12 4v12"/>
+          </svg>
+          <span>Grid</span>
+        </button>
+        <button id="shortcuts-btn" class="button" type="button" title="Keyboard Shortcuts (Hotkey: ?)" aria-haspopup="dialog" aria-controls="shortcuts-dialog">
+          <svg class="btn-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="10" cy="10" r="8"/><path d="M7.5 8a2.5 2.5 0 0 1 5 0c0 1.5-2 2-2 3M10 15h.01"/>
+          </svg>
+          <span>Keys</span>
+        </button>
+      </div>
+
+      <span class="toolbar-divider" aria-hidden="true"></span>
+
+      <div class="toolbar-section toolbar-tools">
+        <button id="add-note-btn" class="button" type="button" title="Add sticky note to circuit">
+          <svg class="btn-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3h12a1 1 0 0 1 1 1v8.5L12.5 17H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M12 12v5l5-5h-5z"/><path d="M7 7h6M7 10h4"/></svg>
+          <span>Note</span>
+        </button>
+        <button id="open-btn" class="button" type="button">
+          <svg class="btn-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6a2 2 0 0 1 2-2h4l2 2h4a2 2 0 0 1 2 2v2M3 10h14l-1.5 7h-11L3 10z"/></svg>
+          <span>Open</span>
+        </button>
+        <input id="open-file" type="file" accept=".json,.circuit.json,application/json" hidden>
+        <button id="export-json-btn" class="button" type="button" title="Save backup JSON file">
+          <svg class="btn-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v10M6 9l4 4 4-4M3 15v1a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-1"/></svg>
+          <span>Backup</span>
+        </button>
+        <button id="export-bom-btn" class="button" type="button" title="Download CSV Bill of Materials">
+          <svg class="btn-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3h12a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M3 7h14M3 12h14M8 7v10"/></svg>
+          <span>BOM CSV</span>
+        </button>
+        <button id="export-png-btn" class="button" type="button" title="Export high-resolution PNG">
+          <svg class="btn-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="14" height="14" rx="2"/><circle cx="7.5" cy="7.5" r="1.5"/><path d="M17 13l-4-4-6 6"/></svg>
+          <span>Export PNG</span>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="workspace">
+    <aside id="tray" class="parts-panel">
+      <div class="tray-heading">
+        <div class="panel-title">
+          <span class="panel-kicker">PARTS CATALOG</span>
+          <h2>Components</h2>
+        </div>
+        <button id="tray-toggle" type="button" aria-expanded="true" aria-controls="tray-list" aria-label="Toggle parts panel" title="Collapse library panel">
+          <svg class="toggle-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15l-5-5 5-5"/></svg>
+        </button>
+      </div>
+
+      <div class="search-section">
+        <label class="search-label" for="part-search">Search library</label>
+        <div class="search-wrap">
+          <svg class="search-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="6"/><path d="M14 14l4 4"/></svg>
+          <input id="part-search" type="search" placeholder="Name, IC, pin, sensor..." autocomplete="off">
+          <kbd class="shortcut-chip">/</kbd>
+        </div>
+      </div>
+
+      <div class="category-filters-container">
+        <div id="category-filters" class="category-filters" role="group" aria-label="Filter parts by category"></div>
+      </div>
+
+      <section id="part-details" class="part-details" aria-live="polite" hidden></section>
+      <div id="tray-list" class="tray-list" aria-live="polite"></div>
+
+      <div class="library-footnote">
+        <span class="library-footnote-pulse" aria-hidden="true"></span>
+        <span>Click or drag a component to place</span>
+      </div>
+    </aside>
+
+    <section id="stage-wrap" class="board-area" aria-label="Circuit workspace">
+      <div class="board-label">
+        <div class="board-label-badge" aria-hidden="true">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 4h12M2 8h12M2 12h12M4 2v12M8 2v12M12 2v12"/></svg>
+        </div>
+        <div class="board-label-text">
+          <strong>Interactive Circuit Board</strong>
+          <small>Precision 1mm Snap • Orthogonal Routing</small>
+        </div>
+      </div>
+
+      <div id="stage"></div>
+
+      <button id="custom-part-toggle" type="button" aria-expanded="false" aria-controls="custom-part-drawer">
+        <svg class="btn-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4v12M4 10h12"/></svg>
+        <span>Custom Part</span>
+      </button>
+
+      <aside id="custom-part-drawer" class="custom-part-drawer" aria-hidden="true" aria-labelledby="custom-part-heading">
+        <div class="custom-part-drawer-heading">
+          <div>
+            <span class="custom-part-kicker">CAD GENERATOR</span>
+            <h2 id="custom-part-heading">Create Custom Part</h2>
+            <p>Design a modular pinout or import a custom JSON spec.</p>
+          </div>
+          <button id="custom-part-close" type="button" aria-label="Close custom part panel" title="Close panel">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5l10 10M15 5L5 15"/></svg>
+          </button>
+        </div>
+
+        <section class="custom-part-form" aria-label="Custom part builder">
+          <div class="custom-part-builder">
+            <p class="custom-part-builder-intro">Configure package geometry and pin mappings. Pinouts save automatically to your browser session.</p>
+
+            <label for="custom-part-name">Part Name
+              <input id="custom-part-name" type="text" maxlength="100" placeholder="e.g. BMP280 Sensor Module" spellcheck="false">
+            </label>
+
+            <div class="custom-part-field-row">
+              <label for="custom-part-category">Category
+                <select id="custom-part-category">
+                  <option value="custom">Custom</option>
+                  <option value="sensor">Sensor</option>
+                  <option value="controller">Controller</option>
+                  <option value="driver">Driver</option>
+                  <option value="actuator">Actuator</option>
+                  <option value="power">Power</option>
+                  <option value="passive">Passive</option>
+                  <option value="output">Output</option>
+                </select>
+              </label>
+              <label for="custom-part-shape">Package Shape
+                <select id="custom-part-shape">
+                  <option value="rounded">Rounded Box</option>
+                  <option value="rectangle">Rectangle</option>
+                  <option value="circle">Circular</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="custom-part-field-row custom-part-size-row">
+              <label for="custom-part-width">Width <span class="unit-badge">px</span>
+                <input id="custom-part-width" type="number" min="64" max="500" value="160">
+              </label>
+              <label for="custom-part-height">Height <span class="unit-badge">px</span>
+                <input id="custom-part-height" type="number" min="64" max="500" value="110">
+              </label>
+              <label for="custom-part-color" class="custom-part-color-label">Color
+                <input id="custom-part-color" type="color" value="#2563eb">
+              </label>
+            </div>
+
+            <label for="custom-part-pin-labels">Pin Labels <span class="helper-text">(comma separated)</span>
+              <input id="custom-part-pin-labels" type="text" value="VCC, GND, SDA, SCL" placeholder="VCC, GND, OUT" spellcheck="false">
+            </label>
+
+            <div class="custom-part-field-row">
+              <label for="custom-part-pin-side">Pin Orientation
+                <select id="custom-part-pin-side">
+                  <option value="bottom">Bottom Edge</option>
+                  <option value="top">Top Edge</option>
+                  <option value="left">Left Edge</option>
+                  <option value="right">Right Edge</option>
+                </select>
+              </label>
+              <label for="custom-part-pin-type">Default Pin Type
+                <select id="custom-part-pin-type">
+                  <option value="signal">Signal</option>
+                  <option value="power">Power (VCC)</option>
+                  <option value="ground">Ground (GND)</option>
+                  <option value="data">Data Line</option>
+                  <option value="other">General I/O</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="custom-part-preview-wrap">
+              <div class="preview-backdrop-grid"></div>
+              <svg id="custom-part-preview" role="img" aria-label="Part preview" viewBox="0 0 160 110">
+                <path id="custom-part-preview-body"></path>
+                <g id="custom-part-preview-pins"></g>
+              </svg>
+              <span class="preview-caption">Real-Time Footprint Preview</span>
+            </div>
+
+            <button id="custom-part-create" class="button-action" type="button">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M10 4v12M4 10h12"/></svg>
+              <span>Build & Place Part</span>
+            </button>
+          </div>
+
+          <details class="custom-part-advanced">
+            <summary>
+              <span>Direct JSON Specification</span>
+              <svg class="chevron-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6l4 4 4-4"/></svg>
+            </summary>
+            <div class="advanced-json-content">
+              <label for="custom-part-json">Raw JSON Definition</label>
+              <textarea id="custom-part-json" rows="7" spellcheck="false" placeholder='{"id":"custom-sensor","name":"Custom Sensor","category":"sensor","size":{"width":160,"height":100},"visual":{"type":"path","d":"M10 10H150V90H10Z","fill":"#2563eb","stroke":"#1d4ed8","strokeWidth":2},"pins":[{"id":"vcc","label":"VCC","x":30,"y":95,"side":"bottom","type":"power"},{"id":"gnd","label":"GND","x":60,"y":95,"side":"bottom","type":"ground"}]}'></textarea>
+              <button id="add-custom-part-btn" class="button-action" type="button">
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 4v12M4 10h12"/></svg>
+                <span>Import JSON Footprint</span>
+              </button>
+            </div>
+          </details>
+
+          <span id="custom-part-status" role="status" aria-live="polite"></span>
+        </section>
+      </aside>
+
+      <!-- Floating Net Inspector HUD Card -->
+      <div id="net-inspector-card" class="net-inspector-card" hidden aria-live="polite">
+        <div class="net-inspector-header">
+          <div class="net-title-badge">
+            <span class="net-status-dot" id="net-inspector-dot"></span>
+            <span id="net-inspector-title" class="net-inspector-title">NET: +5V Power Rail</span>
+          </div>
+          <div class="net-inspector-actions">
+            <button id="net-autocolor-btn" class="net-mini-btn" type="button" title="Apply standard color to this net">Auto-Color Net</button>
+            <button id="net-inspector-close" class="net-inspector-close" type="button" aria-label="Close Net Probe" title="Close Net Probe (Esc)">&times;</button>
+          </div>
+        </div>
+        <div class="net-inspector-body">
+          <div class="net-meta-row">
+            <span class="net-meta-chip" id="net-inspector-type">Power Rail (+5.0V)</span>
+            <span class="net-meta-chip" id="net-inspector-count">3 Pins • 2 Wires</span>
+          </div>
+          <div id="net-inspector-health" class="net-health-row health-ok">
+            <span id="net-inspector-health-icon">✅</span>
+            <span id="net-inspector-health-text">No electrical conflicts</span>
+          </div>
+          <div class="net-nodes-label">Connected Nodes:</div>
+          <div id="net-inspector-nodes" class="net-nodes-list"></div>
+        </div>
+      </div>
+
+      <!-- Instant Electrical Warning Toast -->
+      <div id="instant-warning-toast" class="instant-warning-toast" role="alert" aria-live="assertive" hidden>
+        <div class="instant-warning-icon-wrapper">
+          <svg class="instant-warning-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+        </div>
+        <div class="instant-warning-content">
+          <div class="instant-warning-title">SHORT CIRCUIT DETECTED!</div>
+          <div class="instant-warning-message">Power connected directly to Ground.</div>
+        </div>
+        <div class="instant-warning-actions">
+          <button id="instant-warning-undo" class="button button-danger-undo" type="button" title="Immediately undo and delete this wire">
+            <svg class="btn-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8L3 12l4 4"/><path d="M3 12h9a5 5 0 0 0 5-5v-1"/></svg>
+            <span>Undo Wire</span>
+          </button>
+          <button id="instant-warning-dismiss" class="instant-warning-close" type="button" aria-label="Dismiss warning">&times;</button>
+        </div>
+      </div>
+
+      <!-- Floating Digital Multimeter HUD (DMM-800) -->
+      <div id="multimeter-hud" class="multimeter-hud" hidden aria-live="polite">
+        <div class="multimeter-header">
+          <div class="multimeter-drag-handle">
+            <span class="dmm-grip">⠿</span>
+            <span class="multimeter-brand">DMM-800</span>
+            <span class="multimeter-mode-badge">DC VOLTAGE</span>
+          </div>
+          <div class="multimeter-window-controls">
+            <button id="multimeter-minimize-btn" type="button" class="multimeter-min-btn" title="Minimize / Collapse DMM" aria-label="Minimize multimeter">—</button>
+            <button id="multimeter-close-btn" type="button" class="multimeter-close-btn" title="Close Multimeter (Hotkey: M)" aria-label="Close multimeter">&times;</button>
+          </div>
+        </div>
+
+        <div class="multimeter-body">
+          <!-- LCD Display -->
+          <div class="multimeter-lcd">
+            <div class="multimeter-lcd-top">
+              <span class="lcd-badge active">DC V</span>
+              <span class="lcd-badge">AUTO</span>
+              <span class="lcd-badge active">LIVE</span>
+            </div>
+            <div class="multimeter-lcd-main">
+              <span id="multimeter-sign" class="lcd-sign">+</span>
+              <span id="multimeter-digits" class="lcd-digits">0.000</span>
+              <span class="lcd-unit">V</span>
+            </div>
+            <div class="multimeter-bargraph-container">
+              <div id="multimeter-bargraph" class="multimeter-bargraph"></div>
+            </div>
+            <div class="multimeter-lcd-sub">
+              <div class="lcd-sub-row">
+                <span class="sub-lead-tag red">RED (+)</span>
+                <span id="dmm-red-label" class="sub-lead-val">Touch Pin or Wire</span>
+              </div>
+              <div class="lcd-sub-row">
+                <span class="sub-lead-tag blk">COM (−)</span>
+                <span id="dmm-blk-label" class="sub-lead-val">Circuit GND (0.00V)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Controls & Probes -->
+          <div class="multimeter-controls">
+            <div class="multimeter-probes-row">
+              <button id="dmm-probe-red-btn" type="button" class="dmm-probe-btn red active" title="Select Red Probe (V+) to attach to pins or wires">
+                <span class="probe-btn-icon red">●</span>
+                <span>Probe Red (+)</span>
+              </button>
+              <button id="dmm-probe-blk-btn" type="button" class="dmm-probe-btn black" title="Select Black Probe (COM-) to attach to pins or wires">
+                <span class="probe-btn-icon black">●</span>
+                <span>Probe Black (−)</span>
+              </button>
+            </div>
+            <div class="multimeter-actions-row">
+              <button id="dmm-ref-gnd-btn" type="button" class="dmm-tool-btn" title="Set Black probe to Circuit Ground (0V)">Ref: GND</button>
+              <button id="dmm-swap-probes-btn" type="button" class="dmm-tool-btn" title="Swap Red (+) and Black (−) probe leads">⇄ Swap</button>
+              <button id="dmm-clear-probes-btn" type="button" class="dmm-tool-btn" title="Reset both probe leads">Reset</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="minimap-container" class="minimap-container" title="Canvas Radar - Click to navigate" aria-label="Canvas mini-map radar">
+        <canvas id="minimap-canvas" width="160" height="100"></canvas>
+        <div class="minimap-badge">RADAR</div>
+      </div>
+
+      <div class="view-controls" aria-label="Canvas view controls">
+        <button id="zoom-out-btn" type="button" aria-label="Zoom out" title="Zoom out (−)">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 8h10"/></svg>
+        </button>
+        <output id="zoom-level" aria-live="polite">100%</output>
+        <button id="zoom-in-btn" type="button" aria-label="Zoom in" title="Zoom in (+)">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 3v10M3 8h10"/></svg>
+        </button>
+        <span class="view-controls-divider" aria-hidden="true"></span>
+        <button id="reset-view-btn" type="button" title="Reset zoom and center view">Reset</button>
+        <span class="view-controls-divider" aria-hidden="true"></span>
+        <button id="hud-clear-btn" class="hud-clear-btn" type="button" title="Clear entire workspace and start fresh">Clear</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Dialogs & Modals -->
+  <dialog id="remove-part-dialog" aria-labelledby="remove-part-title">
+    <div class="dialog-card">
+      <div class="dialog-header">
+        <div class="dialog-icon-badge warning" aria-hidden="true">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 3L2 17h16L10 3z"/><path d="M10 9v4M10 15h.01"/></svg>
+        </div>
+        <div>
+          <span class="dialog-kicker">CATALOG REMOVAL</span>
+          <h2 id="remove-part-title">Remove Custom Part?</h2>
+        </div>
+      </div>
+      <p id="remove-part-message" class="dialog-message"></p>
+      <div class="dialog-actions">
+        <button id="remove-part-cancel" class="dialog-btn secondary" type="button">Keep Part</button>
+        <button id="remove-part-confirm" class="dialog-btn danger" type="button">Remove From Catalog</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="resistor-dialog" aria-labelledby="resistor-dialog-title">
+    <form id="resistor-form" class="dialog-card resistor-card">
+      <div class="dialog-header">
+        <div>
+          <span class="dialog-kicker">PRECISION RESISTOR</span>
+          <h2 id="resistor-dialog-title">Resistance Tuning</h2>
+          <p id="resistor-summary" class="dialog-subtext">Color code for 220 Ω · gold tolerance band ±5%</p>
+        </div>
+        <button id="resistor-cancel" class="note-close-btn" type="button" aria-label="Close dialog" title="Close">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3l10 10M13 3L3 13"/></svg>
+        </button>
+      </div>
+
+      <div class="dialog-field-block">
+        <label for="resistor-value">Target Resistance <span class="helper-text">(e.g. 220, 4.7k, 1M)</span></label>
+        <input id="resistor-value" type="text" inputmode="decimal" value="220" placeholder="220, 4.7k, or 1M" required spellcheck="false">
+      </div>
+
+      <!-- Axial resistor visual preview container -->
+      <div class="resistor-schematic-wrap">
+        <div class="axial-resistor-graphic">
+          <div class="resistor-lead left"></div>
+          <div class="resistor-body">
+            <div id="resistor-band-preview" class="resistor-band-preview" aria-label="Resistor color bands"></div>
+          </div>
+          <div class="resistor-lead right"></div>
+        </div>
+      </div>
+
+      <div class="dialog-actions">
+        <button id="resistor-cancel-bottom" class="dialog-btn secondary" type="button">Cancel</button>
+        <button class="dialog-btn primary" type="submit">Apply Value</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="note-dialog" aria-labelledby="note-dialog-title">
+    <form id="note-form" class="dialog-card">
+      <div class="dialog-header">
+        <div>
+          <span class="dialog-kicker">ENGINEERING MEMO</span>
+          <h2 id="note-dialog-title">Add Circuit Note</h2>
+          <p id="note-dialog-help" class="dialog-subtext">Attach reminders, pinout notes, or test points directly to the board.</p>
+        </div>
+        <button id="note-close-btn" class="note-close-btn" type="button" aria-label="Close dialog" title="Close">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3l10 10M13 3L3 13"/></svg>
+        </button>
+      </div>
+
+      <div class="dialog-field-block">
+        <label for="note-content">Note Content</label>
+        <textarea id="note-content" rows="4" maxlength="1000" placeholder="Type engineering notes, pin voltages, or reminders…" required></textarea>
+      </div>
+
+      <div class="dialog-footer-meta">
+        <span class="dialog-tip">Tip: Notes can be dragged anywhere across the board surface.</span>
+        <div class="dialog-actions">
+          <button id="note-cancel-btn" class="dialog-btn secondary" type="button">Cancel</button>
+          <button id="note-submit-btn" class="dialog-btn primary" type="submit">Place Note</button>
+        </div>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="clear-workspace-dialog" aria-labelledby="clear-workspace-title">
+    <div class="dialog-card">
+      <div class="dialog-header">
+        <div class="dialog-icon-badge danger" aria-hidden="true">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h12M8 6V4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2M15 6v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+        </div>
+        <div>
+          <span class="dialog-kicker">BOARD RESET</span>
+          <h2 id="clear-workspace-title">Start with a Clean Board?</h2>
+        </div>
+      </div>
+      <p class="clear-workspace-message">This removes all placed parts, connected wires, and notes from the workspace. You can use <strong>Undo (Ctrl+Z)</strong> immediately to restore your state if needed.</p>
+      <div class="dialog-actions">
+        <button id="clear-workspace-cancel" class="dialog-btn secondary" type="button">Cancel</button>
+        <button id="clear-workspace-confirm" class="dialog-btn danger" type="button">Clear Workspace</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="wiring-checks-dialog" aria-labelledby="wiring-checks-title">
+    <div class="dialog-card">
+      <div class="dialog-header">
+        <div class="wire-checks-icon" aria-hidden="true">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2L3 5v5c0 4.5 3 7.8 7 9 4-1.2 7-4.5 7-9V5l-7-3z"/><path d="M7 10l2.5 2.5 4.5-4.5"/></svg>
+        </div>
+        <div>
+          <span class="dialog-kicker">ELECTRICAL VALIDATION</span>
+          <h2 id="wiring-checks-title">Wiring Diagnostics</h2>
+        </div>
+      </div>
+      <p id="wiring-checks-summary" class="clear-workspace-message">Scanning node topology for short circuits, floating pins, and logic voltage mismatches.</p>
+      <ul id="wiring-checks-list" class="wiring-checks-list" hidden></ul>
+      <div class="dialog-actions">
+        <button id="wiring-checks-close" class="dialog-btn primary" type="button">Done</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="shortcuts-dialog" class="shortcuts-dialog" aria-labelledby="shortcuts-title">
+    <div class="dialog-card shortcuts-card">
+      <div class="dialog-header">
+        <div class="dialog-icon-badge" aria-hidden="true">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="14" height="12" rx="2"/><path d="M6 8h.01M9 8h.01M12 8h.01M6 12h8"/></svg>
+        </div>
+        <div style="flex:1;">
+          <span class="dialog-kicker">CAD QUICK REFERENCE</span>
+          <h2 id="shortcuts-title">Keyboard Shortcuts</h2>
+        </div>
+        <button id="shortcuts-close" class="dialog-close-btn" type="button" aria-label="Close shortcuts dialog">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5l10 10M15 5L5 15"/></svg>
+        </button>
+      </div>
+      
+      <div class="shortcuts-grid">
+        <div class="shortcut-group">
+          <h3>Canvas & Navigation</h3>
+          <div class="shortcut-row"><span class="shortcut-desc">Pan Canvas</span><div class="shortcut-keys"><kbd>Space</kbd> + <kbd>Drag</kbd></div></div>
+          <div class="shortcut-row"><span class="shortcut-desc">Zoom In / Out</span><div class="shortcut-keys"><kbd>Scroll</kbd></div></div>
+          <div class="shortcut-row"><span class="shortcut-desc">Reset View</span><div class="shortcut-keys"><kbd>Reset</kbd></div></div>
+        </div>
+
+        <div class="shortcut-group">
+          <h3>Component Editing</h3>
+          <div class="shortcut-row"><span class="shortcut-desc">Duplicate Selected</span><div class="shortcut-keys"><kbd>Ctrl</kbd> + <kbd>D</kbd></div></div>
+          <div class="shortcut-row"><span class="shortcut-desc">Select All Parts</span><div class="shortcut-keys"><kbd>Ctrl</kbd> + <kbd>A</kbd></div></div>
+          <div class="shortcut-row"><span class="shortcut-desc">Rotate Part 90°</span><div class="shortcut-keys"><kbd>R</kbd></div></div>
+          <div class="shortcut-row"><span class="shortcut-desc">Delete Part or Wire</span><div class="shortcut-keys"><kbd>Del</kbd> / <kbd>⌫</kbd></div></div>
+          <div class="shortcut-row"><span class="shortcut-desc">Edit Resistor Value</span><div class="shortcut-keys"><kbd>Dbl Click</kbd></div></div>
+        </div>
+
+        <div class="shortcut-group">
+          <h3>Wiring & CAD Modes</h3>
+          <div class="shortcut-row"><span class="shortcut-desc">Digital Multimeter</span><div class="shortcut-keys"><kbd>M</kbd></div></div>
+          <div class="shortcut-row"><span class="shortcut-desc">Net Probe Tool</span><div class="shortcut-keys"><kbd>X</kbd></div></div>
+          <div class="shortcut-row"><span class="shortcut-desc">Auto-Color All Wires</span><div class="shortcut-keys"><kbd>Shift</kbd> + <kbd>C</kbd></div></div>
+          <div class="shortcut-row"><span class="shortcut-desc">Signal Flow (Pulse)</span><div class="shortcut-keys"><kbd>P</kbd></div></div>
+          <div class="shortcut-row"><span class="shortcut-desc">20px Grid Snap</span><div class="shortcut-keys"><kbd>G</kbd></div></div>
+          <div class="shortcut-row"><span class="shortcut-desc">Quick Wire Colors</span><div class="shortcut-keys"><kbd>1</kbd> – <kbd>7</kbd></div></div>
+          <div class="shortcut-row"><span class="shortcut-desc">Auto Pin Color</span><div class="shortcut-keys"><kbd>0</kbd></div></div>
+          <div class="shortcut-row"><span class="shortcut-desc">Add Wire Bend Node</span><div class="shortcut-keys"><kbd>Dbl Click</kbd></div></div>
+        </div>
+
+        <div class="shortcut-group">
+          <h3>System & Files</h3>
+          <div class="shortcut-row"><span class="shortcut-desc">Undo</span><div class="shortcut-keys"><kbd>Ctrl</kbd> + <kbd>Z</kbd></div></div>
+          <div class="shortcut-row"><span class="shortcut-desc">Redo</span><div class="shortcut-keys"><kbd>Ctrl</kbd> + <kbd>Y</kbd></div></div>
+          <div class="shortcut-row"><span class="shortcut-desc">Quick Save</span><div class="shortcut-keys"><kbd>Ctrl</kbd> + <kbd>S</kbd></div></div>
+          <div class="shortcut-row"><span class="shortcut-desc">Open Shortcuts</span><div class="shortcut-keys"><kbd>?</kbd></div></div>
+        </div>
+      </div>
+
+      <div class="dialog-actions">
+        <button id="shortcuts-got-it" class="dialog-btn primary" type="button">Close</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script src="https://cdn.jsdelivr.net/npm/konva@9/konva.min.js"></script>
+  <script src="app.js?v=20261014-taste-studio"></script>
+  <script src="wires.js"></script>
+  <script src="multimeter.js"></script>
+</body>
+</html>
